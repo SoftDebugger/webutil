@@ -32,7 +32,4 @@ public class Member {
         this.name = name;
     }
 
-    public static void main(String args[]){
-        HandleAnnotation.read(Member.class);
-    }
 }

@@ -13,15 +13,15 @@ public @interface Column {
     /**
      * 表示属性名
      */
-    public String name();
+    public String name() default "";
 
     /**
      * 表示属性长度
      */
-    public int length();
+    public int length() default 0;
 
     /**
      * 属性默认值
      */
-    public String value();
+    public String value() default "";
 }

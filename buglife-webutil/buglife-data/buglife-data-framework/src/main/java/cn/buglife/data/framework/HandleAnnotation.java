@@ -2,6 +2,7 @@ package cn.buglife.data.framework;
 
 import cn.buglife.data.framework.annotation.Column;
 import cn.buglife.data.framework.annotation.Table;
+import cn.buglife.data.framework.exception.FWException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -19,9 +20,12 @@ public class HandleAnnotation {
     /**
      * 从注解中读取实体的信息
      */
-    public static Entity read(Class clazz) {
+    public static Entity read(Class clazz) throws FWException{
         Entity entity = new Entity();
         Table table = (Table) clazz.getAnnotation(Table.class);
+        if (table == null) {
+            throw new FWException(clazz.getName() +" is not an valid entity class");
+        }
         entity.setTable(table.name());
 
         List<Column> columns = new ArrayList<Column>();

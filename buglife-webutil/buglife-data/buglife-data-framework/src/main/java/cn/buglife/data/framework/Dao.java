@@ -1,19 +1,57 @@
 package cn.buglife.data.framework;
 
+import cn.buglife.data.framework.annotation.Column;
 import cn.buglife.data.framework.common.PageParam;
 import cn.buglife.data.framework.common.PageResult;
+import cn.buglife.data.framework.exception.FWException;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
  * Created by CrazyHarry on 2014/11/24.
  */
-public class Dao<T> implements IDao<T> {
+public abstract class Dao<T> implements IDao<T> {
 
     @Override
     public void create(Class<T> clazz, T t) {
-        Annotation[] annotations = clazz.getAnnotations();
+        try {
+            Entity entity = HandleAnnotation.read(clazz);
+
+            //构造插入语句
+            StringBuffer sql = new StringBuffer();
+            sql.append("insert into ");
+            String table = entity.getTable();
+            sql.append(table);
+            List<Column> columns = entity.getColumns();
+            //获取字段名信息以及字段值
+            StringBuffer sb = new StringBuffer();
+            StringBuffer values = new StringBuffer();
+            for (int i = 0; i < columns.size(); i++) {
+                Class tmp = t.getClass();
+                Field field = tmp.getField(columns.get(i).name());
+                values.append(field.get(t));
+                sb.append(columns.get(i).name());
+                if (i != columns.size() - 1) {
+                    sb.append(",");
+                    values.append(",");
+                }
+            }
+            String tableColumns = sb.toString();
+            sql.append(" (");
+            sql.append(tableColumns.toString());
+            sql.append(")");
+            sql.append(" values(");
+            sql.append(values.toString());
+            sql.append(")");
+        } catch (FWException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
