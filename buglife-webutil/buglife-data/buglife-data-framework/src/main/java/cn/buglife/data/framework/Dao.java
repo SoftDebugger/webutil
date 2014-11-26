@@ -5,7 +5,6 @@ import cn.buglife.data.framework.common.PageParam;
 import cn.buglife.data.framework.common.PageResult;
 import cn.buglife.data.framework.exception.FWException;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
