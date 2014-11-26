@@ -1,5 +1,9 @@
 package cn.buglife.data.framework;
 
+import cn.buglife.data.framework.annotation.Column;
+
+import java.util.List;
+
 /**
  * Created by CrazyHarry on 2014/11/24.
  */
@@ -12,7 +16,7 @@ public class Entity {
     /**
      * 表里的所有属性(字段)
      */
-    private String[] columns;
+    private List<Column> columns;
 
     public String getTable() {
         return table;
@@ -22,11 +26,11 @@ public class Entity {
         this.table = table;
     }
 
-    public String[] getColumns() {
+    public List<Column> getColumns() {
         return columns;
     }
 
-    public void setColumns(String[] columns) {
+    public void setColumns(List<Column> columns) {
         this.columns = columns;
     }
 }
