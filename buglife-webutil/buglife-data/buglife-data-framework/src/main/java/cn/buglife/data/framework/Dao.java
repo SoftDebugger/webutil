@@ -4,8 +4,13 @@ import cn.buglife.data.framework.annotation.Column;
 import cn.buglife.data.framework.common.PageParam;
 import cn.buglife.data.framework.common.PageResult;
 import cn.buglife.data.framework.exception.FWException;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -13,9 +18,10 @@ import java.util.List;
  */
 public abstract class Dao<T> implements IDao<T> {
 
+    private DataSource dataSource;
+
     @Override
-    public void create(Class<T> clazz, T t) {
-        try {
+    public void create(Class<T> clazz, T t) throws FWException, NoSuchFieldException, SQLException, IllegalAccessException {
             Entity entity = HandleAnnotation.read(clazz);
 
             //构造插入语句
@@ -44,13 +50,7 @@ public abstract class Dao<T> implements IDao<T> {
             sql.append(" values(");
             sql.append(values.toString());
             sql.append(")");
-        } catch (FWException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+            new SQLHandler(dataSource).query(sql.toString(), new BeanListHandler<T>(clazz));
     }
 
     @Override

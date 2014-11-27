@@ -2,7 +2,9 @@ package cn.buglife.data.framework;
 
 import cn.buglife.data.framework.common.PageParam;
 import cn.buglife.data.framework.common.PageResult;
+import cn.buglife.data.framework.exception.FWException;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ public interface IDao<T> {
      *
      * @param t
      */
-    public void create(Class<T> clazz, T t);
+    public void create(Class<T> clazz, T t) throws FWException, NoSuchFieldException, SQLException, IllegalAccessException;
 
     /**
      * 批量插入记录

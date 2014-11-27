@@ -2,6 +2,7 @@ package cn.buglife.data.framework;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 /**
@@ -11,14 +12,19 @@ public class SQLHandler {
 
     private volatile boolean pmdKnownBroken = false;
 
+    private DataSource dataSource;
+    public SQLHandler(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     /**
-     *通过占位符动态填充SQL中的变量值.
+     * 通过占位符动态填充SQL中的变量值.
      *
      * @param stmt
      * @param params
      * @throws SQLException
      */
-    public void fillStatement(PreparedStatement stmt, Object... params)
+    private void fillStatement(PreparedStatement stmt, Object... params)
             throws SQLException {
 
         // check the parameter count, if we can
@@ -66,8 +72,7 @@ public class SQLHandler {
 
     /**
      * 执行SQL查询
-     * @param conn
-     * @param closeConn
+     *
      * @param sql
      * @param rsh
      * @param params
@@ -75,26 +80,9 @@ public class SQLHandler {
      * @return SQL执行的结果集
      * @throws SQLException
      */
-    public <T> T query(Connection conn, boolean closeConn, String sql, ResultSetHandler<T> rsh, Object... params)
+    public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params)
             throws SQLException {
-        if (conn == null) {
-            throw new SQLException("Null connection");
-        }
-
-        //接收不到JDBC连接信息时关闭连接
-        if (sql == null) {
-            if (closeConn) {
-                FWUtil.close(conn);
-            }
-            throw new SQLException("Null SQL statement");
-        }
-
-        if (rsh == null) {
-            if (closeConn) {
-                FWUtil.close(conn);
-            }
-            throw new SQLException("Null ResultSetHandler");
-        }
+        Connection conn = this.dataSource.getConnection();
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -113,12 +101,11 @@ public class SQLHandler {
                 FWUtil.close(rs);
             } finally {
                 FWUtil.close(stmt);
-                if (closeConn) {
-                    FWUtil.close(conn);
-                }
+                FWUtil.close(conn);
             }
         }
 
         return result;
     }
+
 }
