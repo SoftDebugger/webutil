@@ -4,6 +4,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.Arrays;
 
 /**
  * Created by CrazyHarry on 2014/11/27.
@@ -13,6 +14,7 @@ public class SQLHandler {
     private volatile boolean pmdKnownBroken = false;
 
     private DataSource dataSource;
+
     public SQLHandler(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -40,7 +42,6 @@ public class SQLHandler {
             }
         }
 
-        // nothing to do here
         if (params == null) {
             return;
         }
@@ -49,17 +50,9 @@ public class SQLHandler {
             if (params[i] != null) {
                 stmt.setObject(i + 1, params[i]);
             } else {
-                // VARCHAR works with many drivers regardless
-                // of the actual column type. Oddly, NULL and
-                // OTHER don't work with Oracle's drivers.
                 int sqlType = Types.VARCHAR;
                 if (!pmdKnownBroken) {
                     try {
-                        /*
-                         * It's not possible for pmdKnownBroken to change from
-                         * true to false, (once true, always true) so pmd cannot
-                         * be null here.
-                         */
                         sqlType = pmd.getParameterType(i + 1);
                     } catch (SQLException e) {
                         pmdKnownBroken = true;
@@ -68,6 +61,32 @@ public class SQLHandler {
                 stmt.setNull(i + 1, sqlType);
             }
         }
+    }
+
+    private void rethrow(SQLException cause, String sql, Object... params)
+            throws SQLException {
+
+        String causeMessage = cause.getMessage();
+        if (causeMessage == null) {
+            causeMessage = "";
+        }
+        StringBuffer msg = new StringBuffer(causeMessage);
+
+        msg.append(" Query: ");
+        msg.append(sql);
+        msg.append(" Parameters: ");
+
+        if (params == null) {
+            msg.append("[]");
+        } else {
+            msg.append(Arrays.deepToString(params));
+        }
+
+        SQLException e = new SQLException(msg.toString(), cause.getSQLState(),
+                cause.getErrorCode());
+        e.setNextException(cause);
+
+        throw e;
     }
 
     /**
@@ -95,7 +114,7 @@ public class SQLHandler {
             result = rsh.handle(rs);
 
         } catch (SQLException e) {
-            //TODO this.rethrow(e, sql, params);
+            this.rethrow(e, sql, params);
         } finally {
             try {
                 FWUtil.close(rs);
@@ -108,4 +127,130 @@ public class SQLHandler {
         return result;
     }
 
+    /**
+     * 执行SQL插入语句
+     *
+     * @param sql
+     * @param rsh
+     * @param params
+     * @param <T>
+     * @throws SQLException
+     */
+    public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params)
+            throws SQLException {
+        Connection conn = this.dataSource.getConnection();
+        PreparedStatement stmt = null;
+        T generatedKeys = null;
+
+        try {
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            this.fillStatement(stmt, params);
+            stmt.executeUpdate();
+            ResultSet resultSet = stmt.getGeneratedKeys();
+            generatedKeys = rsh.handle(resultSet);
+        } catch (SQLException e) {
+            this.rethrow(e, sql, params);
+        } finally {
+            FWUtil.close(stmt);
+            FWUtil.close(conn);
+        }
+
+        return generatedKeys;
+    }
+
+    /**
+     * 批量插入
+     *
+     * @param sql
+     * @param rsh
+     * @param params
+     * @param <T>
+     * @throws SQLException
+     */
+    public <T> T insertBatch(String sql, ResultSetHandler<T> rsh, Object[][] params)
+            throws SQLException {
+        Connection conn = this.dataSource.getConnection();
+        PreparedStatement stmt = null;
+        T generatedKeys = null;
+        try {
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            for (int i = 0; i < params.length; i++) {
+                this.fillStatement(stmt, params[i]);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            ResultSet rs = stmt.getGeneratedKeys();
+            generatedKeys = rsh.handle(rs);
+
+        } catch (SQLException e) {
+            this.rethrow(e, sql, (Object[]) params);
+        } finally {
+            FWUtil.close(stmt);
+            FWUtil.close(conn);
+        }
+
+        return generatedKeys;
+    }
+
+    /**
+     * 执行更新SQL语句
+     *
+     * @param sql
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    public int update(String sql, Object... params) throws SQLException {
+        Connection conn = this.dataSource.getConnection();
+
+        PreparedStatement stmt = null;
+        int rows = 0;
+
+        try {
+            stmt = conn.prepareStatement(sql);
+            this.fillStatement(stmt, params);
+            rows = stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            this.rethrow(e, sql, params);
+
+        } finally {
+            FWUtil.close(stmt);
+            FWUtil.close(conn);
+        }
+
+        return rows;
+    }
+
+    /**
+     * 执行批量操作SQL语句
+     *
+     * @param sql
+     * @param params
+     * @return
+     * @throws SQLException
+     */
+    public int[] batch(String sql, Object[][] params) throws SQLException {
+        Connection conn = this.dataSource.getConnection();
+        PreparedStatement stmt = null;
+        int[] rows = null;
+        try {
+            stmt = conn.prepareStatement(sql);
+
+            for (int i = 0; i < params.length; i++) {
+                this.fillStatement(stmt, params[i]);
+                stmt.addBatch();
+            }
+            rows = stmt.executeBatch();
+
+        } catch (SQLException e) {
+            this.rethrow(e, sql, (Object[]) params);
+        } finally {
+            FWUtil.close(stmt);
+            FWUtil.close(conn);
+        }
+
+        return rows;
+    }
 }
