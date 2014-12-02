@@ -1,6 +1,6 @@
 package cn.buglife.data.framework;
 
-import org.apache.commons.dbutils.ResultSetHandler;
+import cn.buglife.data.framework.handler.RSHandler;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -99,7 +99,7 @@ public class SQLHandler {
      * @return SQL执行的结果集
      * @throws SQLException
      */
-    public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params)
+    public <T> T query(String sql, RSHandler<T> rsh, Object... params)
             throws SQLException {
         Connection conn = this.dataSource.getConnection();
 
@@ -136,7 +136,7 @@ public class SQLHandler {
      * @param <T>
      * @throws SQLException
      */
-    public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params)
+    public <T> T insert(String sql, RSHandler<T> rsh, Object... params)
             throws SQLException {
         Connection conn = this.dataSource.getConnection();
         PreparedStatement stmt = null;
@@ -167,7 +167,7 @@ public class SQLHandler {
      * @param <T>
      * @throws SQLException
      */
-    public <T> T insertBatch(String sql, ResultSetHandler<T> rsh, Object[][] params)
+    public <T> T insertBatch(String sql, RSHandler<T> rsh, Object[][] params)
             throws SQLException {
         Connection conn = this.dataSource.getConnection();
         PreparedStatement stmt = null;
