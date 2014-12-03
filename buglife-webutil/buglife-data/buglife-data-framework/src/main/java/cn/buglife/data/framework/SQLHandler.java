@@ -63,7 +63,7 @@ public class SQLHandler {
         }
     }
 
-    private void rethrow(SQLException cause, String sql, Object... params)
+    private void message(SQLException cause, String sql, Object... params)
             throws SQLException {
 
         String causeMessage = cause.getMessage();
@@ -114,7 +114,7 @@ public class SQLHandler {
             result = rsh.handle(rs);
 
         } catch (SQLException e) {
-            this.rethrow(e, sql, params);
+            this.message(e, sql, params);
         } finally {
             try {
                 FWUtil.close(rs);
@@ -149,7 +149,7 @@ public class SQLHandler {
             ResultSet resultSet = stmt.getGeneratedKeys();
             generatedKeys = rsh.handle(resultSet);
         } catch (SQLException e) {
-            this.rethrow(e, sql, params);
+            this.message(e, sql, params);
         } finally {
             FWUtil.close(stmt);
             FWUtil.close(conn);
@@ -184,7 +184,7 @@ public class SQLHandler {
             generatedKeys = rsh.handle(rs);
 
         } catch (SQLException e) {
-            this.rethrow(e, sql, (Object[]) params);
+            this.message(e, sql, (Object[]) params);
         } finally {
             FWUtil.close(stmt);
             FWUtil.close(conn);
@@ -213,7 +213,7 @@ public class SQLHandler {
             rows = stmt.executeUpdate();
 
         } catch (SQLException e) {
-            this.rethrow(e, sql, params);
+            this.message(e, sql, params);
 
         } finally {
             FWUtil.close(stmt);
@@ -245,7 +245,7 @@ public class SQLHandler {
             rows = stmt.executeBatch();
 
         } catch (SQLException e) {
-            this.rethrow(e, sql, (Object[]) params);
+            this.message(e, sql, (Object[]) params);
         } finally {
             FWUtil.close(stmt);
             FWUtil.close(conn);

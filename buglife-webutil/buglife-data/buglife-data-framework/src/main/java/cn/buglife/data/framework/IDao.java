@@ -26,14 +26,14 @@ public interface IDao<T> {
      *
      * @param list
      */
-    public void batchCreate(Class<T> clazz, List<T> list);
+    public void batchCreate(Class<T> clazz, List<T> list) throws FWException, NoSuchFieldException, SQLException, IllegalAccessException ;
 
     /**
      * 根据ID查询一个记录
      *
      * @return <code>T</code>
      */
-    public T getById(Class<T> clazz, Object id);
+    public T getById(Class<T> clazz, Object id) ;
 
     /**
      * 获取所有的记录
