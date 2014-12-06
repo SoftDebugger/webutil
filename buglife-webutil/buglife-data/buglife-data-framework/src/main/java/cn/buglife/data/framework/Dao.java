@@ -5,7 +5,6 @@ import cn.buglife.data.framework.common.PageParam;
 import cn.buglife.data.framework.common.PageResult;
 import cn.buglife.data.framework.exception.FWException;
 import cn.buglife.data.framework.handler.BeanHandler;
-import cn.buglife.data.framework.handler.BeanListHandler;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
