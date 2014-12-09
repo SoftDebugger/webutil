@@ -1,6 +1,5 @@
 package cn.buglife.data.access.model;
 
-import cn.buglife.data.framework.HandleAnnotation;
 import cn.buglife.data.framework.annotation.Column;
 import cn.buglife.data.framework.annotation.Table;
 
