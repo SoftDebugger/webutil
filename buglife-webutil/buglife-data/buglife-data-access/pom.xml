@@ -12,12 +12,27 @@
 
     <artifactId>buglife-data-access</artifactId>
     <packaging>jar</packaging>
-    <properties>
-        <file>../../property/jdbc.properties</file>
-    </properties>
     <build>
         <finalName>buglife-data-access</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>../../property/jdbc.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>sql-maven-plugin</artifactId>
@@ -31,10 +46,10 @@
                 </dependencies>
                 <!--配置数据库连接-->
                 <configuration>
-                    <driver>com.mysql.jdbc.Driver</driver>
-                    <url>jdbc:mysql://localhost:3306</url>
-                    <username>root</username>
-                    <password>root</password>
+                    <driver>${driver}</driver>
+                    <url>${url}</url>
+                    <username>${username}</username>
+                    <password>${password}</password>
                 </configuration>
                 <executions>
                     <!--创建数据库-->
