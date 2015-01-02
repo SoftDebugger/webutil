@@ -13,6 +13,7 @@
         <module>buglife-quartz</module>
         <module>buglife-web</module>
         <module>buglife-data</module>
+        <module>buglife-demo</module>
     </modules>
 
     <build>
