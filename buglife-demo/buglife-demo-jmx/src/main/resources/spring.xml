@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+<bean id="loggingMBean" class="cn.buglife.demo.jmx.LoggingConfigImpl"/>
+<bean id="exporterLogConfig" class="org.springframework.jmx.export.MBeanExporter">
+<property name="beans">
+    <map>
+        <entry key="de.stefanheintz.log:jmxservice=loggingConfiguration" value-ref="loggingMBean" />
+    </map>
+</property>
+<property name="assembler">
+    <bean class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler">
+        <property name="managedInterfaces">
+            <value>cn.buglife.demo.jmx.LoggingConfig</value>
+        </property>
+    </bean>
+</property>
+</bean>
+</beans>
