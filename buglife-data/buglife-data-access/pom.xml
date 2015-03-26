@@ -12,9 +12,95 @@
 
     <artifactId>buglife-data-access</artifactId>
     <packaging>jar</packaging>
-
     <build>
         <finalName>buglife-data-access</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>../../property/jdbc.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+                <version>1.5</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>5.1.27</version>
+                    </dependency>
+                </dependencies>
+                <!--配置数据库连接-->
+                <configuration>
+                    <driver>${driver}</driver>
+                    <url>${url}</url>
+                    <username>${username}</username>
+                    <password>${password}</password>
+                </configuration>
+                <executions>
+                    <!--创建数据库-->
+                    <execution>
+                        <id>create-db</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <!--设置自动提交事务-->
+                            <autocommit>true</autocommit>
+                            <srcFiles>
+                                <srcFile>src/main/resources/create_db.sql</srcFile>
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                    <!--创建数据表-->
+                    <execution>
+                        <id>create-table</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <autocommit>true</autocommit>
+                            <srcFiles>
+                                <srcFile>src/main/resources/create_table.sql</srcFile>
+                            </srcFiles>
+                        </configuration>
+                    </execution>
+                    <!--插入数据-->
+                    <execution>
+                        <id>insert-data</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <orderFile>ascending</orderFile>
+                            <fileset>
+                                <basedir>${basedir}</basedir>
+                                <includes>
+                                    <include>src/main/resources/init_data.sql</include>
+                                </includes>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencies>

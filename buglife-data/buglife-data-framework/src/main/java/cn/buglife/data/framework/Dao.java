@@ -4,8 +4,11 @@ import cn.buglife.data.framework.annotation.Column;
 import cn.buglife.data.framework.common.PageParam;
 import cn.buglife.data.framework.common.PageResult;
 import cn.buglife.data.framework.exception.FWException;
+import cn.buglife.data.framework.handler.BeanHandler;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -13,49 +16,84 @@ import java.util.List;
  */
 public abstract class Dao<T> implements IDao<T> {
 
-    @Override
-    public void create(Class<T> clazz, T t) {
-        try {
-            Entity entity = HandleAnnotation.read(clazz);
+    private DataSource dataSource;
 
-            //构造插入语句
-            StringBuffer sql = new StringBuffer();
-            sql.append("insert into ");
-            String table = entity.getTable();
-            sql.append(table);
-            List<Column> columns = entity.getColumns();
-            //获取字段名信息以及字段值
-            StringBuffer sb = new StringBuffer();
-            StringBuffer values = new StringBuffer();
-            for (int i = 0; i < columns.size(); i++) {
-                Class tmp = t.getClass();
-                Field field = tmp.getField(columns.get(i).name());
-                values.append(field.get(t));
-                sb.append(columns.get(i).name());
-                if (i != columns.size() - 1) {
-                    sb.append(",");
-                    values.append(",");
-                }
+    @Override
+    public void create(Class<T> clazz, T t) throws FWException, NoSuchFieldException, SQLException, IllegalAccessException {
+        Entity entity = HandleAnnotation.read(clazz);
+
+        //构造插入语句
+        StringBuffer sql = new StringBuffer();
+        sql.append("insert into ");
+        String table = entity.getTable();
+        sql.append(table);
+        List<Column> columns = entity.getColumns();
+        //获取字段名信息以及字段值
+        StringBuffer sb = new StringBuffer();
+        StringBuffer values = new StringBuffer();
+        for (int i = 0; i < columns.size(); i++) {
+            Class tmp = t.getClass();
+            Field field = tmp.getField(columns.get(i).name());
+            values.append(field.get(t));
+            sb.append(columns.get(i).name());
+            if (i != columns.size() - 1) {
+                sb.append(",");
+                values.append(",");
             }
-            String tableColumns = sb.toString();
-            sql.append(" (");
-            sql.append(tableColumns.toString());
-            sql.append(")");
-            sql.append(" values(");
-            sql.append(values.toString());
-            sql.append(")");
-        } catch (FWException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
         }
+        String tableColumns = sb.toString();
+        sql.append(" (");
+        sql.append(tableColumns.toString());
+        sql.append(")");
+        sql.append(" values(");
+        sql.append(values.toString());
+        sql.append(")");
+        new SQLHandler(dataSource).insert(sql.toString(), new BeanHandler<T>(clazz));
     }
 
     @Override
-    public void batchCreate(Class<T> clazz, List<T> list) {
+    public void batchCreate(Class<T> clazz, List<T> list) throws FWException, NoSuchFieldException, SQLException, IllegalAccessException {
+        Entity entity = HandleAnnotation.read(clazz);
 
+        //构造插入语句
+        StringBuffer sql = new StringBuffer();
+        sql.append("insert into ");
+        String table = entity.getTable();
+        sql.append(table);
+        List<Column> columns = entity.getColumns();
+        //获取字段名信息以及字段值
+        StringBuffer sb = new StringBuffer();
+        String tableColumns = sb.toString();
+        sql.append(" (");
+        sql.append(tableColumns.toString());
+        sql.append(")");
+        sql.append(" values(");
+        StringBuffer values = new StringBuffer();
+        if (list != null && list.size() != 0) {
+            for (int k = 0; k < list.size(); k++) {
+                StringBuffer value = new StringBuffer();
+                for (int i = 0; i < columns.size(); i++) {
+                    Class tmp = list.get(k).getClass();
+                    Field field = tmp.getField(columns.get(i).name());
+                    value.append(field.get(list.get(k)));
+                    sb.append(columns.get(i).name());
+                    if (i != columns.size() - 1) {
+                        sb.append(",");
+                        value.append(",");
+                    }
+                }
+                if (k != list.size() - 1) {
+                    value.append("),");
+                } else {
+                    value.append(")");
+                }
+                values.append(value);
+            }
+        }
+
+        sql.append(values.toString());
+        sql.append(";");
+        new SQLHandler(dataSource).insertBatch(sql.toString(), new BeanHandler<T>(clazz), null);
     }
 
     @Override

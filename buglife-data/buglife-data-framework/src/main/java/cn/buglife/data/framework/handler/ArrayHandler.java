@@ -16,12 +16,14 @@
  */
 package cn.buglife.data.framework.handler;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import cn.buglife.data.framework.BasicRecordProcessor;
+import cn.buglife.data.framework.RecordProcessor;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.RowProcessor;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * <code>ResultSetHandler</code> implementation that converts a
@@ -37,7 +39,7 @@ public class ArrayHandler implements ResultSetHandler<Object[]> {
      * the default scoping to allow only classes in this package to use this
      * instance.
      */
-    static final RowProcessor ROW_PROCESSOR = new BasicRowProcessor();
+    static final RecordProcessor RECORD_PROCESSOR = new BasicRecordProcessor();
 
     /**
      * An empty array to return when no more rows are available in the ResultSet.
@@ -48,14 +50,14 @@ public class ArrayHandler implements ResultSetHandler<Object[]> {
      * The RowProcessor implementation to use when converting rows
      * into arrays.
      */
-    private final RowProcessor convert;
+    private final RecordProcessor convert;
 
     /**
      * Creates a new instance of ArrayHandler using a
      * <code>BasicRowProcessor</code> for conversion.
      */
     public ArrayHandler() {
-        this(ROW_PROCESSOR);
+        this(RECORD_PROCESSOR);
     }
 
     /**
@@ -64,7 +66,7 @@ public class ArrayHandler implements ResultSetHandler<Object[]> {
      * @param convert The <code>RowProcessor</code> implementation
      * to use when converting rows into arrays.
      */
-    public ArrayHandler(RowProcessor convert) {
+    public ArrayHandler(RecordProcessor convert) {
         super();
         this.convert = convert;
     }

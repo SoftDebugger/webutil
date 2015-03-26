@@ -8,9 +8,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title></title>
+    <title>angular demo</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="../lib/angular-1.2.1/angular.min.js"></script>
 </head>
-<body>
+<body ng-app="demo">
 
+<script type="text/javascript" src="../script/angular/app.js"></script>
 </body>
 </html>
