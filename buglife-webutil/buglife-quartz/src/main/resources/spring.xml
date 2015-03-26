@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <!-- 注入要执行的类 -->
+    <bean id="demoJob" class="cn.buglife.webutil.quartz.task.TaskDemo"></bean>
+    <!-- 调用demoJob中的execute方法 -->
+    <bean id="task" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="demoJob"/>
+        </property>
+        <property name="targetMethod">
+            <value>execute</value>
+        </property>
+    </bean>
+
+    <!-- 使用cron表达式定义触发job的时间 -->
+    <bean id="triggerTime" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail">
+            <ref bean="task"/>
+        </property>
+        <property name="cronExpression">
+            <value>10,15,20,25,30,35,40,45,50,55 * * * * ?</value>
+        </property>
+    </bean>
+
+    <!-- lazy-init=false则意味着启动Spring容器时就会执行Job  -->
+    <bean id="startQuertz" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="triggerTime"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>
