@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+                     debug="false">
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d - %c -%-4r [%t] %-5p %x - %m%n" />
+        </layout>
+    </appender>
+
+    <!--每天一个文件LOG文件 -->
+    <appender name="dailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="encoding" value="UTF-8"></param>
+        <param name="Threshold" value="ERROR"></param>
+        <param name="ImmediateFlush" value="true"></param>
+        <param name="File" value="${catalina.base}/logs/buglife/log"></param>
+        <param name="DatePattern" value="'_'yyyyMMdd'.log'"></param>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="[%d{yyyy-MM-dd HH:mm:ss\} %-5p] [%t] {%c:%L}-%m%n"></param>
+        </layout>
+    </appender>
+
+    <!--对指定目录打LIFE日志到上面所定义的文件里-->
+    <category name="cn.buglife.webutil.life">
+        <priority value="LIFE" class="cn.buglife.webutil.web.util.Life" />
+        <level value="LIFE" />
+        <appender-ref ref="console" />
+        <appender-ref ref="dailyRollingFile" />
+    </category>
+    <root>
+        <priority value="INFO" />
+        <appender-ref ref="console" />
+        <appender-ref ref="dailyRollingFile" />
+    </root>
+</log4j:configuration>
